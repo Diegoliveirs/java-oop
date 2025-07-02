@@ -9,6 +9,7 @@ import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.diego.sitiomarcio.models.Cliente;
 import com.diego.sitiomarcio.models.Reserva;
@@ -29,7 +30,7 @@ public class ReservaService {
     }
 
     public boolean criarReserva(Reserva reserva) throws Exception{
-        String json = String.format("""
+        String json = String.format(Locale.US, """
               {
               "cliente_nome": "%s",
               "cliente_tel": "%s",
@@ -47,7 +48,7 @@ public class ReservaService {
                 reserva.getDataSaida(),
                 reserva.getDiaria(),
                 reserva.getCriadoPor().getEmail()
-                );
+        );
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_BASE))
@@ -58,6 +59,8 @@ public class ReservaService {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("Supabase Response Status Code: " + response.statusCode());
+        System.out.println("Supabase Response Body: " + response.body());
         return response.statusCode() == 201;
     }
 

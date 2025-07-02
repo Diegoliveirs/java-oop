@@ -7,11 +7,13 @@ import com.diego.sitiomarcio.services.ReservaService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        scanner.useLocale(Locale.US);
         ReservaService service = new ReservaService();
 
         while (true) {
@@ -21,7 +23,7 @@ public class App {
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
             int opcao = scanner.nextInt();
-            scanner.nextLine(); // limpa o buffer
+            scanner.nextLine();
 
             try {
                 if (opcao == 1) {
@@ -78,13 +80,14 @@ public class App {
 
                 } else if (opcao == 0) {
                     System.out.println("Encerrando o programa.");
-                    break; // encerra o while
+                    break;
                 } else {
                     System.out.println("Opção inválida.");
                 }
 
             } catch (Exception e) {
-                System.out.println("❌ Erro: " + e.getMessage());
+                System.out.println("❌ Erro: Não foi possivel cadastrar a reserva");
+                e.printStackTrace();
             }
         }
 

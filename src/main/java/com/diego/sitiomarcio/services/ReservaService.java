@@ -1,12 +1,14 @@
 package com.diego.sitiomarcio.services;
 
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -62,6 +64,80 @@ public class ReservaService {
         System.out.println("Supabase Response Status Code: " + response.statusCode());
         System.out.println("Supabase Response Body: " + response.body());
         return response.statusCode() == 201;
+    }
+
+    public boolean deletarReserva(int indice) throws Exception {
+        List<Reserva> reservas = listarReservas();
+
+        if (indice < 0 || indice >= reservas.size()) {
+            System.out.println("❌ Índice inválido.");
+            return false;
+        }
+
+        String id = reservas.get(indice).getId();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(URL_BASE + "?id=eq." + id))
+                .header("apikey", API_KEY)
+                .header("Authorizathion", "Bearer " + API_KEY)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("Status code delete: " + response.statusCode());
+        System.out.println("Resposta delete " + response.body());
+
+        return response.statusCode() == 204;
+
+    }
+
+    public boolean editarReserva(int indice, Reserva novaReserva) throws Exception {
+        List<Reserva> reservas = listarReservas();
+
+        if (indice < 0 || indice >= reservas.size()) {
+            System.out.println("❌ Índice inválido.");
+            return false;
+        }
+
+        String id = reservas.get(indice).getId();
+
+        DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+
+        String json = String.format("""
+        {
+          "cliente_nome": "%s",
+          "cliente_tel": "%s",
+          "observacao": "%s",
+          "data_entrada": "%s",
+          "data_saida": "%s",
+          "diaria": %f,
+          "criado_por": "%s"
+        }
+        """,
+                novaReserva.getCliente().getNome(),
+                novaReserva.getCliente().getTelefone(),
+                novaReserva.getCliente().getObservacao(),
+                novaReserva.getDataEntrada().format(isoFormatter),
+                novaReserva.getDataSaida().format(isoFormatter),
+                novaReserva.getDiaria(),
+                novaReserva.getCriadoPor().getEmail()
+        );
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(URL_BASE + "?id=eq." + id))
+                .header("Content-Type", "application/json")
+                .header("apikey", API_KEY)
+                .header("Authorization", "Bearer " + API_KEY)
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("Status code edit: " + response.statusCode());
+        System.out.println("Resposta Edit: " + response.body());
+
+        return response.statusCode() == 204;
     }
 
     public List<Reserva> listarReservas() throws Exception{

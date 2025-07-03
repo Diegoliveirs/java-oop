@@ -79,7 +79,7 @@ public class ReservaService {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_BASE + "?id=eq." + id))
                 .header("apikey", API_KEY)
-                .header("Authorizathion", "Bearer " + API_KEY)
+                .header("Authorization", "Bearer " + API_KEY)
                 .DELETE()
                 .build();
 
@@ -127,6 +127,7 @@ public class ReservaService {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_BASE + "?id=eq." + id))
                 .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
                 .header("apikey", API_KEY)
                 .header("Authorization", "Bearer " + API_KEY)
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(json))

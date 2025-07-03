@@ -17,6 +17,8 @@ public class App {
         scanner.useLocale(Locale.US);
         ReservaService service = new ReservaService();
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy");
+
         while (true) {
             System.out.println("\n====== MENU ======");
             System.out.println("1. Cadastrar reserva");
@@ -39,15 +41,11 @@ public class App {
                     System.out.println("Observação: ");
                     String observacao = scanner.nextLine();
 
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy");
-
                     System.out.println("Data de entrada (DD/MM/AA): ");
-                    String entradaStr = scanner.nextLine();
-                    LocalDate entrada = LocalDate.parse(entradaStr, formatter);
+                    LocalDate entrada = LocalDate.parse(scanner.nextLine(), formatter);
 
                     System.out.println("Data de saída (DD/MM/AA): ");
-                    String saidaStr = scanner.nextLine();
-                    LocalDate saida = LocalDate.parse(saidaStr, formatter);
+                    LocalDate saida = LocalDate.parse(scanner.nextLine(), formatter);
 
                     System.out.println("Valor da diária: ");
                     double diaria = scanner.nextDouble();
@@ -55,9 +53,7 @@ public class App {
 
                     Cliente cliente = new Cliente(nome, telefone, observacao);
                     Usuario usuario = new Usuario("admin", "admin@admin.com", true); // provisório
-                    Reserva reserva = new Reserva(null, cliente, usuario, entrada, saida, diaria
-                    );
-
+                    Reserva reserva = new Reserva(null, cliente, usuario, entrada, saida, diaria);
 
                     boolean sucesso = service.criarReserva(reserva);
 
@@ -77,8 +73,8 @@ public class App {
                             System.out.println("Cliente: " + r.getCliente().getNome());
                             System.out.println("Telefone: " + r.getCliente().getTelefone());
                             System.out.println("Observação: " + r.getCliente().getObservacao());
-                            System.out.println("Entrada: " + r.getDataEntrada());
-                            System.out.println("Saída: " + r.getDataSaida());
+                            System.out.println("Entrada: " + r.getDataEntrada().format(formatter));
+                            System.out.println("Saída: " + r.getDataSaida().format(formatter));
                             System.out.println("Diária: R$ " + r.getDiaria());
                             System.out.println("Total: R$ " + r.getValorTotal());
                             System.out.println("Registrado por: " + r.getCriadoPor().getEmail());
@@ -94,7 +90,6 @@ public class App {
                     System.out.print("Digite o numero da reserva que deseja editar: ");
                     int indice = Integer.parseInt(scanner.nextLine());
 
-
                     System.out.println("Digite o novo nome do cliente: ");
                     String nome = scanner.nextLine();
 
@@ -105,10 +100,10 @@ public class App {
                     String observacao = scanner.nextLine();
 
                     System.out.println("Digite nova data de entrada (DD/MM/AA): ");
-                    LocalDate entrada = LocalDate.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("dd/MM/yy"));
+                    LocalDate entrada = LocalDate.parse(scanner.nextLine(), formatter);
 
                     System.out.println("Digite nova data de saída (DD/MM/AA): ");
-                    LocalDate saida = LocalDate.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("dd/MM/yy"));
+                    LocalDate saida = LocalDate.parse(scanner.nextLine(), formatter);
 
                     System.out.println("Digite novo valor da diária: ");
                     double diaria = Double.parseDouble(scanner.nextLine());
@@ -142,7 +137,7 @@ public class App {
                 }
 
             } catch (Exception e) {
-                System.out.println("❌ Erro: Não foi possivel cadastrar a reserva");
+                System.out.println("❌ Erro: Não foi possível processar a operação");
                 e.printStackTrace();
             }
         }

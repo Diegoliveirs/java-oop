@@ -41,11 +41,33 @@ public class App {
                     System.out.println("Observação: ");
                     String observacao = scanner.nextLine();
 
-                    System.out.println("Data de entrada (DD/MM/AA): ");
-                    LocalDate entrada = LocalDate.parse(scanner.nextLine(), formatter);
+                    LocalDate entrada;
+                    while (true) {
+                        System.out.println("Data de entrada (DD/MM/AA): ");
+                        entrada = LocalDate.parse(scanner.nextLine(), formatter);
+                        boolean ocupada = service.dataJaReservada(entrada, null);
 
-                    System.out.println("Data de saída (DD/MM/AA): ");
-                    LocalDate saida = LocalDate.parse(scanner.nextLine(), formatter);
+                        if (ocupada) {
+                            System.out.println("❌ Esta data já está reservada. Digite outra.");
+                        }else {
+                            break;
+                        }
+                        
+                    }
+
+                    LocalDate saida;
+                    while (true) {
+                        System.out.println("Data de entrada (DD/MM/AA): ");
+                        saida = LocalDate.parse(scanner.nextLine(), formatter);
+                        boolean ocupada = service.dataJaReservada(saida, null);
+
+                        if (ocupada) {
+                            System.out.println("❌ Esta data já está reservada. Digite outra.");
+                        }else {
+                            break;
+                        }
+
+                    }
 
                     System.out.println("Valor da diária: ");
                     double diaria = scanner.nextDouble();
@@ -83,52 +105,57 @@ public class App {
 
                 } else if (opcao == 3) {
                     List<Reserva> reservas = service.listarReservas();
-                    for (int i = 0; i < reservas.size(); i++) {
-                        System.out.println(i + " - " + reservas.get(i).getCliente().getNome());
+                    if (reservas.isEmpty()) {
+                        System.out.println("❌ Nenhuma reserva disponível para editar.");
+                    }else {
+                        for (int i = 0; i < reservas.size(); i++) {
+                            System.out.println(i + " - " + reservas.get(i).getCliente().getNome());
+                        }
+
+                        System.out.print("Digite o numero da reserva que deseja editar: ");
+                        int indice = Integer.parseInt(scanner.nextLine());
+
+                        System.out.println("Digite o novo nome do cliente: ");
+                        String nome = scanner.nextLine();
+
+                        System.out.println("Digite o novo telefone: ");
+                        String telefone = scanner.nextLine();
+
+                        System.out.println("Digite nova observação: ");
+                        String observacao = scanner.nextLine();
+
+                        System.out.println("Digite nova data de entrada (DD/MM/AA): ");
+                        LocalDate entrada = LocalDate.parse(scanner.nextLine(), formatter);
+
+                        System.out.println("Digite nova data de saída (DD/MM/AA): ");
+                        LocalDate saida = LocalDate.parse(scanner.nextLine(), formatter);
+
+                        System.out.println("Digite novo valor da diária: ");
+                        double diaria = Double.parseDouble(scanner.nextLine());
+
+                        Cliente novoCliente = new Cliente(nome, telefone, observacao);
+                        Usuario novoUsuario = new Usuario("admin", "admin@admin.com", true);
+
+                        Reserva reservaAtualizada = new Reserva(null, novoCliente, novoUsuario, entrada, saida, diaria);
+
+                        boolean ok = service.editarReserva(indice, reservaAtualizada);
+                        System.out.println(ok ? "✅ Editado com sucesso!" : "❌ Falha ao editar.");
                     }
-
-                    System.out.print("Digite o numero da reserva que deseja editar: ");
-                    int indice = Integer.parseInt(scanner.nextLine());
-
-                    System.out.println("Digite o novo nome do cliente: ");
-                    String nome = scanner.nextLine();
-
-                    System.out.println("Digite o novo telefone: ");
-                    String telefone = scanner.nextLine();
-
-                    System.out.println("Digite nova observação: ");
-                    String observacao = scanner.nextLine();
-
-                    System.out.println("Digite nova data de entrada (DD/MM/AA): ");
-                    LocalDate entrada = LocalDate.parse(scanner.nextLine(), formatter);
-
-                    System.out.println("Digite nova data de saída (DD/MM/AA): ");
-                    LocalDate saida = LocalDate.parse(scanner.nextLine(), formatter);
-
-                    System.out.println("Digite novo valor da diária: ");
-                    double diaria = Double.parseDouble(scanner.nextLine());
-
-                    Cliente novoCliente = new Cliente(nome, telefone, observacao);
-                    Usuario novoUsuario = new Usuario("admin", "admin@admin.com", true);
-
-                    Reserva reservaAtualizada = new Reserva(null, novoCliente, novoUsuario, entrada, saida, diaria);
-
-                    boolean ok = service.editarReserva(indice, reservaAtualizada);
-                    System.out.println(ok ? "✅ Editado com sucesso!" : "❌ Falha ao editar.");
-
                 } else if (opcao == 4) {
                     List<Reserva> reservas = service.listarReservas();
+                    if (reservas.isEmpty()){
+                        System.out.println("❌ Nenhuma reserva disponível para deletar.");
+                    }else {
+                        for (int i = 0; i < reservas.size(); i++) {
+                            System.out.println(i + " - " + reservas.get(i).getCliente().getNome());
+                        }
 
-                    for (int i = 0; i < reservas.size(); i++) {
-                        System.out.println(i + " - " + reservas.get(i).getCliente().getNome());
+                        System.out.println("Digite o numero da reserva que deseja deletar: ");
+                        int indice = Integer.parseInt(scanner.nextLine());
+
+                        boolean ok = service.deletarReserva(indice);
+                        System.out.println(ok ? "✅ Deletado com sucesso!" : "❌ Falha ao deletar.");
                     }
-
-                    System.out.println("Digite o numero da reserva que deseja deletar: ");
-                    int indice = Integer.parseInt(scanner.nextLine());
-
-                    boolean ok = service.deletarReserva(indice);
-                    System.out.println(ok ? "✅ Deletado com sucesso!" : "❌ Falha ao deletar.");
-
                 } else if (opcao == 0) {
                     System.out.println("Encerrando o programa.");
                     break;

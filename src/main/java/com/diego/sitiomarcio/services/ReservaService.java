@@ -1,7 +1,6 @@
 package com.diego.sitiomarcio.services;
 
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -104,7 +103,7 @@ public class ReservaService {
 
         DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
-        String json = String.format("""
+        String json = String.format(Locale.US,"""
         {
           "cliente_nome": "%s",
           "cliente_tel": "%s",
@@ -181,4 +180,27 @@ public class ReservaService {
         }
         return reservas;
     }
+
+    public boolean dataJaReservada(LocalDate data, String idIgnorado) throws Exception {
+        List<Reserva> reservas = listarReservas();
+
+        for(Reserva reserva : reservas) {
+            if (idIgnorado != null && reserva.getId().equals(idIgnorado)) {
+                continue;
+            }
+
+            LocalDate entrada = reserva.getDataEntrada();
+            LocalDate saida = reserva.getDataSaida();
+
+            if (
+                    data.isEqual(entrada) ||
+                            data.isEqual(saida) ||
+                            (data.isAfter(entrada) && data.isBefore(saida))
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

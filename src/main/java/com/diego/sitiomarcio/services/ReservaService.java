@@ -272,16 +272,9 @@ public class ReservaService {
         if (reservas.isEmpty()) {
             System.out.println("Nenhuma reserva encontrada.");
         } else {
-            for (Reserva r : reservas) {
-                System.out.println("\n-----------------------------");
-                System.out.println("Cliente: " + r.getCliente().getNome());
-                System.out.println("Telefone: " + r.getCliente().getTelefone());
-                System.out.println("Observação: " + r.getCliente().getObservacao());
-                System.out.println("Entrada: " + r.getDataEntrada().format(formatter));
-                System.out.println("Saída: " + r.getDataSaida().format(formatter));
-                System.out.println("Diária: R$ " + r.getDiaria());
-                System.out.println("Total: R$ " + r.getValorTotal());
-                System.out.println("Registrado por: " + r.getCriadoPor().getEmail());
+            System.out.println("======= RESERVAS =======");
+            for (int i = 0; i < reservas.size(); i++) {
+                System.out.println(formatarResumoReserva(reservas.get(i), i));
             }
         }
     }
@@ -341,5 +334,16 @@ public class ReservaService {
             boolean ok = deletarReserva(indice);
             System.out.println(ok ? "✅ Deletado com sucesso!" : "❌ Falha ao deletar.");
         }
+    }
+
+    public String formatarResumoReserva(Reserva reserva, int index) {
+        return String.format("[%d] %s - %s -> %s | R$ %.2f | Total: R$ %.2f | \uD83D\uDCE9 %s",
+                index,
+                reserva.getCliente().getNome(),
+                reserva.getDataEntrada().format(formatter),
+                reserva.getDataSaida().format(formatter),
+                reserva.getDiaria(),
+                reserva.getValorTotal(),
+                reserva.getCriadoPor().getNome());
     }
 }

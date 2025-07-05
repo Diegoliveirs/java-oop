@@ -10,9 +10,16 @@ public class App {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         scanner.useLocale(Locale.US);
+
         ReservaService reservaService = new ReservaService();
         Menu menu = new Menu(scanner,reservaService);
 
+        try {
+            menu.exibirMenu();
+        } catch (Exception e) {
+            System.out.println("❌ Erro ao exibir menu: " + e.getMessage());
+            e.printStackTrace();
+        }
         scanner.close();
     }
 }

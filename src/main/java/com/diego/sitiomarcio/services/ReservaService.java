@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 
 import com.diego.sitiomarcio.models.Cliente;
 import com.diego.sitiomarcio.models.Reserva;
@@ -24,24 +25,25 @@ public class ReservaService {
     private static final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6YmdkdWVwZG5uemhyam5lZ3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzNzIzMjAsImV4cCI6MjA2Njk0ODMyMH0.p2CtD5zGe61P20uDGbUGM1pcSBYYJefHhN6P3N5k360";
     private final HttpClient client;
     private final ObjectMapper mapper;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy");
 
     public ReservaService() {
         client = HttpClient.newHttpClient();
         mapper = new ObjectMapper();
     }
 
-    public boolean criarReserva(Reserva reserva) throws Exception{
+    public boolean criarReserva(Reserva reserva) throws Exception {
         String json = String.format(Locale.US, """
-              {
-              "cliente_nome": "%s",
-              "cliente_tel": "%s",
-              "observacao": "%s",
-              "data_entrada": "%s",
-              "data_saida": "%s",
-              "diaria": %f,
-              "criado_por": "%s"
-            }
-            """,
+                          {
+                          "cliente_nome": "%s",
+                          "cliente_tel": "%s",
+                          "observacao": "%s",
+                          "data_entrada": "%s",
+                          "data_saida": "%s",
+                          "diaria": %f,
+                          "criado_por": "%s"
+                        }
+                        """,
                 reserva.getCliente().getNome(),
                 reserva.getCliente().getTelefone(),
                 reserva.getCliente().getObservacao(),
@@ -103,17 +105,17 @@ public class ReservaService {
 
         DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
-        String json = String.format(Locale.US,"""
-        {
-          "cliente_nome": "%s",
-          "cliente_tel": "%s",
-          "observacao": "%s",
-          "data_entrada": "%s",
-          "data_saida": "%s",
-          "diaria": %f,
-          "criado_por": "%s"
-        }
-        """,
+        String json = String.format(Locale.US, """
+                        {
+                          "cliente_nome": "%s",
+                          "cliente_tel": "%s",
+                          "observacao": "%s",
+                          "data_entrada": "%s",
+                          "data_saida": "%s",
+                          "diaria": %f,
+                          "criado_por": "%s"
+                        }
+                        """,
                 novaReserva.getCliente().getNome(),
                 novaReserva.getCliente().getTelefone(),
                 novaReserva.getCliente().getObservacao(),
@@ -140,7 +142,7 @@ public class ReservaService {
         return response.statusCode() == 204;
     }
 
-    public List<Reserva> listarReservas() throws Exception{
+    public List<Reserva> listarReservas() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_BASE + "?select=*"))
                 .header("apikey", API_KEY)
@@ -184,7 +186,7 @@ public class ReservaService {
     public boolean dataJaReservada(LocalDate data, String idIgnorado) throws Exception {
         List<Reserva> reservas = listarReservas();
 
-        for(Reserva reserva : reservas) {
+        for (Reserva reserva : reservas) {
             if (idIgnorado != null && reserva.getId().equals(idIgnorado)) {
                 continue;
             }
@@ -203,4 +205,141 @@ public class ReservaService {
         return false;
     }
 
+    public void handlerCriarReserva(Scanner scanner) throws Exception {
+
+        System.out.println("Nome do cliente: ");
+        String nome = scanner.nextLine();
+
+        System.out.println("Telefone: ");
+        String telefone = scanner.nextLine();
+
+        System.out.println("Observação: ");
+        String observacao = scanner.nextLine();
+
+        LocalDate entrada;
+        while (true) {
+            System.out.println("Data de entrada (DD/MM/AA): ");
+            entrada = LocalDate.parse(scanner.nextLine(), formatter);
+
+
+            if (dataJaReservada(entrada, null)) {
+                System.out.println("❌ Esta data já está reservada. Digite outra.");
+            } else {
+                break;
+            }
+        }
+
+        LocalDate saida;
+        while (true) {
+            System.out.println("Data de saída (DD/MM/AA): ");
+            saida = LocalDate.parse(scanner.nextLine(), formatter);
+
+
+            if (saida.isBefore(entrada)) {
+                System.out.println("❌ Data de saída não pode ser antes da data de entrada.");
+                continue;
+            }
+
+            if (dataJaReservada(entrada, null)) {
+                System.out.println("❌ Esta data já está reservada. Digite outra.");
+            } else {
+                break;
+            }
+
+        }
+
+        System.out.println("Valor da diária: ");
+        double diaria = scanner.nextDouble();
+        scanner.nextLine();
+
+        Cliente cliente = new Cliente(nome, telefone, observacao);
+        Usuario usuario = new Usuario("admin", "admin@admin.com", true); // provisório
+        Reserva reserva = new Reserva(null, cliente, usuario, entrada, saida, diaria);
+
+        boolean sucesso = criarReserva(reserva);
+
+        if (sucesso) {
+            System.out.println("✅ Reserva criada com sucesso!");
+        } else {
+            System.out.println("❌ Erro ao criar reserva.");
+        }
+
+
+    }
+
+    public void handlerListarReservas(Scanner scanner) throws Exception {
+        List<Reserva> reservas = listarReservas();
+        if (reservas.isEmpty()) {
+            System.out.println("Nenhuma reserva encontrada.");
+        } else {
+            for (Reserva r : reservas) {
+                System.out.println("\n-----------------------------");
+                System.out.println("Cliente: " + r.getCliente().getNome());
+                System.out.println("Telefone: " + r.getCliente().getTelefone());
+                System.out.println("Observação: " + r.getCliente().getObservacao());
+                System.out.println("Entrada: " + r.getDataEntrada().format(formatter));
+                System.out.println("Saída: " + r.getDataSaida().format(formatter));
+                System.out.println("Diária: R$ " + r.getDiaria());
+                System.out.println("Total: R$ " + r.getValorTotal());
+                System.out.println("Registrado por: " + r.getCriadoPor().getEmail());
+            }
+        }
+    }
+
+    public void handlerEditarReservas(Scanner scanner) throws Exception{
+        List<Reserva> reservas = listarReservas();
+        if (reservas.isEmpty()) {
+            System.out.println("❌ Nenhuma reserva disponível para editar.");
+        }else {
+            for (int i = 0; i < reservas.size(); i++) {
+                System.out.println(i + " - " + reservas.get(i).getCliente().getNome());
+            }
+
+            System.out.print("Digite o numero da reserva que deseja editar: ");
+            int indice = Integer.parseInt(scanner.nextLine());
+
+            System.out.println("Digite o novo nome do cliente: ");
+            String nome = scanner.nextLine();
+
+            System.out.println("Digite o novo telefone: ");
+            String telefone = scanner.nextLine();
+
+            System.out.println("Digite nova observação: ");
+            String observacao = scanner.nextLine();
+
+            System.out.println("Digite nova data de entrada (DD/MM/AA): ");
+            LocalDate entrada = LocalDate.parse(scanner.nextLine(), formatter);
+
+            System.out.println("Digite nova data de saída (DD/MM/AA): ");
+            LocalDate saida = LocalDate.parse(scanner.nextLine(), formatter);
+
+            System.out.println("Digite novo valor da diária: ");
+            double diaria = Double.parseDouble(scanner.nextLine());
+
+            Cliente novoCliente = new Cliente(nome, telefone, observacao);
+            Usuario novoUsuario = new Usuario("admin", "admin@admin.com", true);
+
+            Reserva reservaAtualizada = new Reserva(null, novoCliente, novoUsuario, entrada, saida, diaria);
+
+            boolean ok = editarReserva(indice, reservaAtualizada);
+            System.out.println(ok ? "✅ Editado com sucesso!" : "❌ Falha ao editar.");
+        }
+    }
+
+    public void handlerDeletarReservas(Scanner scanner) throws Exception{
+        List<Reserva> reservas = listarReservas();
+        if (reservas.isEmpty()){
+            System.out.println("❌ Nenhuma reserva disponível para deletar.");
+        }else {
+            for (int i = 0; i < reservas.size(); i++) {
+                System.out.println(i + " - " + reservas.get(i).getCliente().getNome());
+            }
+
+            System.out.println("Digite o numero da reserva que deseja deletar: ");
+            int indice = Integer.parseInt(scanner.nextLine());
+
+            boolean ok = deletarReserva(indice);
+            System.out.println(ok ? "✅ Deletado com sucesso!" : "❌ Falha ao deletar.");
+        }
+    }
 }

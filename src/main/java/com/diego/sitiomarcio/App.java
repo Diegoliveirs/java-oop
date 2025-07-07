@@ -1,5 +1,7 @@
 package com.diego.sitiomarcio;
 
+import com.diego.sitiomarcio.models.Sessao;
+import com.diego.sitiomarcio.models.Usuario;
 import com.diego.sitiomarcio.services.ReservaService;
 import com.diego.sitiomarcio.ui.Menu;
 
@@ -12,7 +14,8 @@ public class App {
         scanner.useLocale(Locale.US);
 
         ReservaService reservaService = new ReservaService();
-        Menu menu = new Menu(scanner,reservaService);
+          Menu menu = new Menu(scanner,reservaService);
+        Usuario usuario = Sessao.getUsuarioLogado();
 
         try {
             menu.exibirMenu();

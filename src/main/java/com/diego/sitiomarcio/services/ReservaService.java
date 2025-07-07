@@ -41,7 +41,7 @@ public class ReservaService {
                           "data_entrada": "%s",
                           "data_saida": "%s",
                           "diaria": %f,
-                          "criado_por": "%s"
+                          "criado_por_nome": "%s"
                         }
                         """,
                 reserva.getCliente().getNome(),
@@ -50,7 +50,7 @@ public class ReservaService {
                 reserva.getDataEntrada(),
                 reserva.getDataSaida(),
                 reserva.getDiaria(),
-                reserva.getCriadoPor().getEmail()
+                reserva.getCriadoPor().getNome()
         );
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -163,8 +163,8 @@ public class ReservaService {
                 );
 
                 Usuario usuario = new Usuario(
-                        node.get("criado_por").asText(),
-                        node.get("criado_por").asText(),
+                        node.get("criado_por_nome").asText(),
+                        node.get("criado_por_email").asText(),
                         false
                 );
 
